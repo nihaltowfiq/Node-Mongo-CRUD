@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node-Mongo-CRUD</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+
+<body>
+    <h1 class="text-center">My first Node-MongoDB attempt!!</h1>
+
+    <div class="container mb-3">
+        <form action="/addProduct" method="POST" class="input-group">
+            <input type="text" name="name" placeholder="name" class="form-control">
+            <input type="number" name="price" placeholder="price" class="form-control">
+            <input type="number" name="quantity" placeholder="quantity" class="form-control">
+            <button type="submit" class="btn btn-primary">Add Product</button>
+        </form>
+    </div>
+    <div class="container text-center" id="products"></div>
+    <div class="container text-center" id="update"></div>
+    <script>
+        function loadAllProducts() {
+            fetch('/products')
+                .then(res => res.json())
+                .then(products => {
+                    console.log(products);
+                    const container = document.getElementById('products');
+                    products.forEach(pd => {
+                        const item = document.createElement('p');
+                        item.innerHTML = `
+                            Name: <strong>${pd.name}</strong> Price: ${pd.price} Quantity: ${pd.quantity}
+                            <button class="btn btn-success" onclick="loadProduct('${pd._id}')">Update</button>
+                            <button class="btn btn-danger" onclick="deleteProduct('${pd._id}')">Delete</button>
+                        `;
+                        container.appendChild(item);
+                    })
+                });
+        };
+        loadAllProducts();
+
+        function loadProduct(id){
+            fetch(`/product/${id}`)
+                .then(res => res.json())
+                .then(result => {
+                    console.log(result);
+                    const update = document.getElementById('update')
+                    update.innerHTML = `
+                        <h4>Update: ${result._id}</h4>
+                        <div class="input-group">
+                            <label class="col-form-label" for="price">Price:</label> <input class="form-control" type="text" value=${result.price} id="price">
+                            </br>
+                            <label class="col-form-label" for="quantity">Quantity:</label> <input class="form-control" type="text" value=${result.quantity} id="quantity">
+                            </br>
+                            <button onclick="updateProduct('${result._id}')" class="btn btn-info form-control">Save</button>    
+                        </div>
+                    `;
+                })
+        };
+
+        function updateProduct(id){
+            const price = document.getElementById('price').value;
+            const quantity = document.getElementById('quantity').value;
+            const product = {id , price , quantity};
+            fetch(`/update/${id}`, {
+                method: 'Patch',
+                headers: { 'Content-Type': 'application/json'},
+                body: JSON.stringify(product)
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('updated');
+            })
+            console.log('updating');
+        };
+
+        function deleteProduct(id) {
+            fetch(`/delete/${id}`, {
+                method: 'DELETE'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    console.log('delete succussfully')
+                })
+        }
+    </script>
+</body>
+
+</html>
