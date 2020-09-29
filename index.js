@@ -30,8 +30,7 @@ client.connect(err => {
         const product = req.body;
         productCollection.insertOne(product)
             .then(result => {
-                console.log('okay paisi');
-                res.send('success')
+                res.redirect('/')
             })
     });
 
@@ -43,21 +42,19 @@ client.connect(err => {
     });
 
     app.patch('/update/:id', (req, res) => {
-        console.log(req.body.price);
         productCollection.updateOne({ _id: ObjectId(req.params.id) },
         {
             $set: { price: req.body.price, quantity: req.body.quantity }
         })
         .then(result => {
-            console.log(result);
+            res.send(result.modifiedCount > 0);
         })
     })
 
     app.delete('/delete/:id', (req, res) => {
-        console.log(req.params.id);
         productCollection.deleteOne({ _id: ObjectId(req.params.id) })
             .then(result => {
-                console.log(result);
+                res.send(result.deletedCount > 0);
             })
     });
 });
